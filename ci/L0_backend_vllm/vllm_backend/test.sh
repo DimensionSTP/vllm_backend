@@ -57,6 +57,8 @@ cp -r ${SAMPLE_MODELS_REPO}/vllm_model models/vllm_opt
 # so that at least 60% of GPU memory was available for other models.
 sed -i 's/"gpu_memory_utilization": 0.5/"gpu_memory_utilization": 0.4/' models/vllm_opt/1/model.json
 cp -r models/vllm_opt models/vllm_load_test
+cp -r ${SAMPLE_MODELS_REPO}/vllm_model models/vllm_embed
+sed -i 's#"model":"facebook/opt-125m"#"model":"intfloat/e5-small"#' models/vllm_embed/1/model.json
 
 mkdir -p models/add_sub/1/
 wget -P models/add_sub/1/ https://raw.githubusercontent.com/triton-inference-server/python_backend/main/examples/add_sub/model.py
@@ -120,7 +122,7 @@ wait $SERVER_PID
 SERVER_ARGS="--model-repository=$(pwd)/models --backend-directory=${BACKEND_DIR} --backend-config=python,default-max-batch-size=8"
 SERVER_LOG="./vllm_test_cmdline_server.log"
 
-rm -rf ./models/vllm_invalid_1 ./models/vllm_invalid_2 ./models/vllm_load_test
+rm -rf ./models/vllm_invalid_1 ./models/vllm_invalid_2 ./models/vllm_load_test ./models/vllm_embed
 
 run_server
 if [ "$SERVER_PID" == "0" ]; then
