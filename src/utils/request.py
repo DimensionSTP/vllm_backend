@@ -308,9 +308,15 @@ class GenerateRequest(RequestBase):
 
 class EmbedRequest(RequestBase):
     def __init__(
-        self, request, executor_callback: Callable, output_dtype: np.dtype, logger
+        self,
+        request,
+        executor_callback: Callable,
+        renderer_callback: Callable,
+        output_dtype: np.dtype,
+        logger,
     ):
         super().__init__(request, executor_callback, output_dtype, logger)
+        self.renderer_callback = renderer_callback
 
     def _get_input_tensors(self):
         embedding_request = pb_utils.get_input_tensor_by_name(
@@ -320,7 +326,7 @@ class EmbedRequest(RequestBase):
         # prompt
         prompt = embedding_request["input"]
         if isinstance(prompt, str):
-            pass  # do nothing
+            prompt = {"prompt": prompt}
         elif (
             isinstance(prompt, list) and len(prompt) > 0 and isinstance(prompt[0], int)
         ):
@@ -352,8 +358,10 @@ class EmbedRequest(RequestBase):
             self.additional_outputs,
         ) = self._get_input_tensors()
 
-        # Create PoolingParams for embeddings
-        response_iterator = self.executor_callback(prompt, pooling_params, self.id)
+        (engine_input,) = await self.renderer_callback([prompt])
+        response_iterator = self.executor_callback(
+            engine_input, pooling_params, self.id
+        )
 
         # Yield each response from the async iterator
         async for response in response_iterator:

@@ -531,7 +531,11 @@ class TritonPythonModel:
                     )
             elif request_task_name == "embed":
                 request = EmbedRequest(
-                    request, self._llm_engine.encode, self.output_dtype, self.logger
+                    request,
+                    self._llm_engine.encode,
+                    self._llm_engine.renderer.render_cmpl_async,
+                    self.output_dtype,
+                    self.logger,
                 )
             else:
                 raise ValueError(

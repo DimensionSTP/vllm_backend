@@ -100,6 +100,13 @@ else
     fi
 fi
 
+python3 ./embed_request_test.py -v > ./vllm_backend_embed_test.log 2>&1
+if [ $? -ne 0 ]; then
+    cat ./vllm_backend_embed_test.log
+    echo -e "\n***\n*** Embed request renderer test FAILED.\n***"
+    RET=1
+fi
+
 if grep -q "Passing raw prompts to InputProcessor is deprecated" "$SERVER_LOG"; then
     echo -e "\n***\n*** Raw prompt deprecation warning found.\n***"
     RET=1
