@@ -182,9 +182,9 @@ class GenerateRequest(RequestBase):
             lora_local_path = self.lora_repository[lora_name]
             lora_request = LoRARequest(lora_id, lora_int_id, lora_local_path)
 
-        (engine_input,) = await self.renderer_callback([prompt])
+        (prompt,) = await self.renderer_callback([prompt])
         response_iterator = self.executor_callback(
-            engine_input, sampling_params, self.id, lora_request=lora_request
+            prompt, sampling_params, self.id, lora_request=lora_request
         )
 
         async for response in response_iterator:
@@ -358,10 +358,8 @@ class EmbedRequest(RequestBase):
             self.additional_outputs,
         ) = self._get_input_tensors()
 
-        (engine_input,) = await self.renderer_callback([prompt])
-        response_iterator = self.executor_callback(
-            engine_input, pooling_params, self.id
-        )
+        (prompt,) = await self.renderer_callback([prompt])
+        response_iterator = self.executor_callback(prompt, pooling_params, self.id)
 
         # Yield each response from the async iterator
         async for response in response_iterator:
